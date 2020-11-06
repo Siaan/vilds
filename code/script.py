@@ -6,14 +6,16 @@ from lasagne.nonlinearities import leaky_rectify, softmax, linear, tanh, rectify
 from theano.tensor.shared_randomstreams import RandomStreams
 import numpy as np
 from numpy.random import *
-from matplotlib import pyplot as plt
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
 import sys
 
 sys.path.append('lib')  # support files (mathematical tools, mostly)
 
-from generativeModel import *       # Class file for generative models.
-from recognitionModel import *      # Class file for recognition models
-from SGVB import *                  # The meat of the algorithm - define the ELBO and initialize Gen/Rec model
+from GenerativeModel import *       # Class file for generative models.
+from RecognitionModel import *      # Class file for recognition models
+from SGVB import * # The meat of the algorithm - define the ELBO and initialize Gen/Rec model
 
 
 def generate(gendict, xDim, yDim, samples):
@@ -127,7 +129,7 @@ def train_recmodel(training_obs, training_latents, PLDS=PLDS, SmoothingLDSTimeSe
     # learned posterior mean into the 'true' training-data latents
     pM = sgvb.mrec.postX.eval({sgvb.Y: y_data})
     wgt = np.linalg.lstsq(pM-pM.mean(), x_data-x_data.mean())[0]
-
+    print("exiting")
     return pM, wgt, sgvb
 
 
@@ -169,6 +171,7 @@ if __name__ == '__main__':
     #user config file
     xDim = 1
     yDim = 20
+    print("starting")
 
     gendict = dict([('A'     , 0.8*np.eye(xDim)),         # Linear dynamics parameters
                     ('QChol' , 2*np.diag(np.ones(xDim))), # innovation noise
@@ -205,4 +208,5 @@ if __name__ == '__main__':
                      ])
 
     pM, wgt, sgvb = train_recmodel(y_data, x_data)
+    print("last part")
     visualise(pM, wgt, sgvb, true_model)

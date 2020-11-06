@@ -140,3 +140,32 @@ class SGVB():#(Trainable):
         thecost = thelik + theentropy
 
         return thecost/self.Y.shape[0]
+
+########################################
+# Define a helper class to help us iterate through the training data
+class DatasetMiniBatchIndexIterator(object):
+    """ Basic mini-batch iterator """
+    def __init__(self, y, batch_size=100, randomize=False):
+        self.y = y
+        self.batch_size = batch_size
+        self.randomize = randomize
+        from sklearn.utils import check_random_state
+        self.rng = np.random.RandomState(np.random.randint(12039210))
+
+    def __iter__(self):
+        n_samples = self.y.shape[0]
+        #if n_samples == self.batch_size:
+        #    yield [self.y, np.arange(n_samples)]
+        if self.randomize:
+            for _ in xrange(n_samples / self.batch_size):
+                if self.batch_size > 1:
+                    i = int(self.rng.rand(1) * ((n_samples-self.batch_size-1)))
+                else:
+                    i = int(math.floor(self.rng.rand(1) * n_samples))
+                ii = np.arange(i, i + self.batch_size)
+                yield [self.y[ii], ii]
+        else:
+            for i in xrange((n_samples + self.batch_size - 1)
+                            / self.batch_size):
+                ii = np.arange(i*self.batch_size,(i+1)*self.batch_size)
+                yield [self.y[ii], ii]
